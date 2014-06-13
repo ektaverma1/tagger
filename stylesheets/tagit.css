@@ -1,0 +1,22 @@
+.tags {
+	height: auto;
+	overflow: hidden;
+	background: #fff;
+}
+.tags input {
+	border: none;
+	background: #fff;
+}
+.tag {
+	margin: 5px;
+	padding: 2px 10px;
+	background: #0089fa;
+	color: #fff;
+}
+.tag.focused {
+    background: #abcdef;
+}
+.tag span {
+	float: right;
+	cursor: pointer;
+}
