@@ -6,6 +6,10 @@
 .tags input {
 	border: none;
 	background: #fff;
+	padding: 8px;
+}
+.tags input:focus {
+    outline: 0;
 }
 .tag {
 	margin: 5px;
