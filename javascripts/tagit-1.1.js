@@ -1,25 +1,35 @@
 (function ( $ ) {
     
-    $.fn.tagIt = function(){
+    $.fn.tagIt = function(options){
         $.fn.wrapTagger(this);
-
         $.fn.addTagsInput(this);
 
         this.keyup(function(event){
+            $(this).removeClass('alert');
+            $(this).removeAttr('placeholder');
+
             var input = event.currentTarget;
             
             if(event.keyCode == 13 || event.keyCode == 32)
             {
                 var text = $.trim(input.value);
-                var tag = $.fn.addTag(text);
-                $(input).before(tag);
-                var tagsValue = $('#tags-input').val();
-                if (tagsValue == "") {
-                    tagsValue = text; 
-                }else {
-                    tagsValue = tagsValue + "," + text;
+                var isValid = $.fn.validateTag(text,options);
+                if(isValid){
+                    var tag = $.fn.addTag(text);
+                    $(input).before(tag);
+                    var tagsValue = $('#tags-input').val();
+                    if (tagsValue == "") {
+                        tagsValue = text; 
+                    }else {
+                        tagsValue = tagsValue + "," + text;
+                    }
+                    $('#tags-input').val(tagsValue);
                 }
-                $('#tags-input').val(tagsValue);
+                else{
+                    $(this).addClass('alert');
+                    $(this).attr('placeholder','Please enter a valid email');
+                }
+
                 input.value = '';
                 input.focus(); 
             }
@@ -43,6 +53,29 @@
         tagsInput.setAttribute("id","tags-input");
         $(element).before(tagsInput);
     };
+
+    $.fn.validateTag = function(text,options){
+        if(text != ""){
+            if(options.kind == "email"){
+                return $.fn.checkEmail(text);
+            }
+            else if(options.kind == "numeric"){
+                return $.isNumeric(text);
+            }
+            else{
+                return true;
+            }
+        }
+        else{
+            return false;
+        }
+    };
+
+
+    $.fn.checkEmail = function(email) {
+        var filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        return filter.test(email);
+    }
 
     $.fn.addTag = function(text){
                     if(text != ""){
@@ -104,3 +137,7 @@
                 };
  
 }( jQuery ));
+
+String.prototype.endsWith = function(suffix) {
+    return this.match(suffix+"$") == suffix;
+};
