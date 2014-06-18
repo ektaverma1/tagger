@@ -3,6 +3,8 @@
     $.fn.tagIt = function(){
         $.fn.wrapTagger(this);
 
+        $.fn.addTagsInput(this);
+
         this.keyup(function(event){
             var input = event.currentTarget;
             
@@ -11,6 +13,13 @@
                 var text = $.trim(input.value);
                 var tag = $.fn.addTag(text);
                 $(input).before(tag);
+                var tagsValue = $('#tags-input').val();
+                if (tagsValue == "") {
+                    tagsValue = text; 
+                }else {
+                    tagsValue = tagsValue + "," + text;
+                }
+                $('#tags-input').val(tagsValue);
                 input.value = '';
                 input.focus(); 
             }
@@ -24,6 +33,15 @@
         var tagsWrapper = document.createElement("div");
         tagsWrapper.className = "tags";
         element.wrap(tagsWrapper);
+    };
+
+    $.fn.addTagsInput = function(element){
+        var tagsInput = document.createElement("input");
+        tagsInput.setAttribute("type", "hidden");
+        tagsInput.setAttribute("value", "");
+        tagsInput.setAttribute("name", "tags-input");
+        tagsInput.setAttribute("id","tags-input");
+        $(element).before(tagsInput);
     };
 
     $.fn.addTag = function(text){
