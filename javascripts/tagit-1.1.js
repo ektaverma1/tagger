@@ -1,4 +1,6 @@
 (function ( $ ) {
+
+    var MESSAGE = "Please enter valid input. ";
     
     $.fn.tagIt = function(options){
         $.fn.wrapTagger(this);
@@ -13,7 +15,10 @@
             if(event.keyCode == 13 || event.keyCode == 32)
             {
                 var text = $.trim(input.value);
-                var isValid = $.fn.validateTag(text,options);
+                var isValid = true;
+                if(options){
+                    isValid = $.fn.validateTag(text,options);
+                }
                 if(isValid){
                     var tag = $.fn.addTag(text);
                     $(input).before(tag);
@@ -27,7 +32,7 @@
                 }
                 else{
                     $(this).addClass('alert');
-                    $(this).attr('placeholder','Please enter a valid email');
+                    $(this).attr('placeholder',MESSAGE);
                 }
 
                 input.value = '';
@@ -57,9 +62,15 @@
     $.fn.validateTag = function(text,options){
         if(text != ""){
             if(options.kind == "email"){
-                return $.fn.checkEmail(text);
+                if(options.domains){
+                    return $.fn.checkEmail(text,options.domains);    
+                }
+                else{
+                    return $.fn.checkEmail(text);                    
+                }
             }
             else if(options.kind == "numeric"){
+                MESSAGE = "Invalid input. Only numbers are allowed.";
                 return $.isNumeric(text);
             }
             else{
@@ -71,70 +82,89 @@
         }
     };
 
-
-    $.fn.checkEmail = function(email) {
+    $.fn.checkEmail = function(email,domains) {
         var filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-        return filter.test(email);
+        if(filter.test(email)){
+            if(domains){
+                var matchesFlag = false;
+                $.each(domains,function(index,value){
+                    if(email.endsWith(value)){
+                        matchesFlag = true;
+                        // to break each loop
+                        return false;
+                    }                    
+                });
+                MESSAGE = matchesFlag ? "" : "Invalid input. Domain is not allowed.";
+                return matchesFlag;
+            }
+            else{
+                return true;
+            }
+        }
+        else{
+            MESSAGE = "Enter valid email id.";
+            return false;
+        }
     }
 
     $.fn.addTag = function(text){
-                    if(text != ""){
-                        var html = text;
-                        var tagDiv = document.createElement("div");
-                        var closeSpan = document.createElement("span");
-                        closeSpan.innerHTML = 'x';
+        if(text != ""){
+            var html = text;
+            var tagDiv = document.createElement("div");
+            var closeSpan = document.createElement("span");
+            closeSpan.innerHTML = 'x';
 
-                        tagDiv.className = "tag";
-                        $(tagDiv).attr('tabindex','0');
-                        $(tagDiv).html(html); 
-                        $(tagDiv).append(closeSpan);
+            tagDiv.className = "tag";
+            $(tagDiv).attr('tabindex','0');
+            $(tagDiv).html(html); 
+            $(tagDiv).append(closeSpan);
 
-                        $(tagDiv).bind({
-                            keyup: function(event){
-                                        var selectedDiv = $(this);
-                                        if(event.keyCode == 8 || event.keyCode == 46){
-                                            selectedDiv.next().focus();
-                                            var tagText = selectedDiv.text();
-                                            var result = tagText.substring(0, tagText.length-1);
-                                            var originalValue = $('#tags-input').val();
-                                            var updatedValue = "";
+            $(tagDiv).bind({
+                keyup: function(event){
+                            var selectedDiv = $(this);
+                            if(event.keyCode == 8 || event.keyCode == 46){
+                                selectedDiv.next().focus();
+                                var tagText = selectedDiv.text();
+                                var result = tagText.substring(0, tagText.length-1);
+                                var originalValue = $('#tags-input').val();
+                                var updatedValue = "";
 
-                                            if(originalValue.indexOf(result) == 0){
-                                                if(originalValue.indexOf(',') < 0){
-                                                    updatedValue = originalValue.replace(result, "");    
-                                                }
-                                                else{
-                                                    updatedValue = originalValue.replace(result + ',', "");    
-                                                }
-                                            }
-                                            else{
-                                                updatedValue = originalValue.replace(',' + result, "");    
-                                            }
-                                            $('#tags-input').val(updatedValue);
-                                            selectedDiv.remove();
-                                        }
-                                        else if(event.keyCode == 38){
-                                            selectedDiv.prev().focus();
-                                        }
-                                        else if(event.keyCode == 40){
-                                            selectedDiv.next().focus();
-                                        }
-                                    },
-                            'focus blur': function() {
-                                          var element = $( this );
-                                          setTimeout(function() {
-                                            element.toggleClass( "focused", element.is( ":focus" ) );
-                                          }, 0 );
-                                        }
+                                if(originalValue.indexOf(result) == 0){
+                                    if(originalValue.indexOf(',') < 0){
+                                        updatedValue = originalValue.replace(result, "");    
+                                    }
+                                    else{
+                                        updatedValue = originalValue.replace(result + ',', "");    
+                                    }
+                                }
+                                else{
+                                    updatedValue = originalValue.replace(',' + result, "");    
+                                }
+                                $('#tags-input').val(updatedValue);
+                                selectedDiv.remove();
+                            }
+                            else if(event.keyCode == 38){
+                                selectedDiv.prev().focus();
+                            }
+                            else if(event.keyCode == 40){
+                                selectedDiv.next().focus();
+                            }
+                        },
+                'focus blur': function() {
+                              var element = $( this );
+                              setTimeout(function() {
+                                element.toggleClass( "focused", element.is( ":focus" ) );
+                              }, 0 );
+                            }
 
-                        });
-                        $(closeSpan).bind('click',function(){
-                            var divToClose = $(this).parent();
-                            divToClose.remove();
-                        });
-                        return tagDiv;
-                    }
-                };
+            });
+            $(closeSpan).bind('click',function(){
+                var divToClose = $(this).parent();
+                divToClose.remove();
+            });
+            return tagDiv;
+        }
+    };
  
 }( jQuery ));
 
