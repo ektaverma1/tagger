@@ -1,5 +1,4 @@
 (function ( $ ) {
-
     var MESSAGE = "Please enter valid input. ";
     
     $.fn.tagIt = function(options){
@@ -107,6 +106,28 @@
         }
     }
 
+    $.fn.removeTag = function(element){
+        var tagText = element.text();
+        var result = tagText.substring(0, tagText.length-1);
+        var originalValue = $('#tags-input').val();
+        var updatedValue = "";
+
+        if(originalValue.indexOf(result) == 0){
+            if(originalValue.indexOf(',') < 0){
+                updatedValue = originalValue.replace(result, "");    
+            }
+            else{
+                updatedValue = originalValue.replace(result + ',', "");    
+            }
+        }
+        else{
+            updatedValue = originalValue.replace(',' + result, "");    
+        }
+        $('#tags-input').val(updatedValue);
+        element.remove();
+        return this;
+    };
+
     $.fn.addTag = function(text){
         if(text != ""){
             var html = text;
@@ -124,24 +145,25 @@
                             var selectedDiv = $(this);
                             if(event.keyCode == 8 || event.keyCode == 46){
                                 selectedDiv.next().focus();
-                                var tagText = selectedDiv.text();
-                                var result = tagText.substring(0, tagText.length-1);
-                                var originalValue = $('#tags-input').val();
-                                var updatedValue = "";
+                                $.fn.removeTag(selectedDiv);
+                                // var tagText = selectedDiv.text();
+                                // var result = tagText.substring(0, tagText.length-1);
+                                // var originalValue = $('#tags-input').val();
+                                // var updatedValue = "";
 
-                                if(originalValue.indexOf(result) == 0){
-                                    if(originalValue.indexOf(',') < 0){
-                                        updatedValue = originalValue.replace(result, "");    
-                                    }
-                                    else{
-                                        updatedValue = originalValue.replace(result + ',', "");    
-                                    }
-                                }
-                                else{
-                                    updatedValue = originalValue.replace(',' + result, "");    
-                                }
-                                $('#tags-input').val(updatedValue);
-                                selectedDiv.remove();
+                                // if(originalValue.indexOf(result) == 0){
+                                //     if(originalValue.indexOf(',') < 0){
+                                //         updatedValue = originalValue.replace(result, "");    
+                                //     }
+                                //     else{
+                                //         updatedValue = originalValue.replace(result + ',', "");    
+                                //     }
+                                // }
+                                // else{
+                                //     updatedValue = originalValue.replace(',' + result, "");    
+                                // }
+                                // $('#tags-input').val(updatedValue);
+                                // selectedDiv.remove();
                             }
                             else if(event.keyCode == 38){
                                 selectedDiv.prev().focus();
@@ -160,6 +182,7 @@
             });
             $(closeSpan).bind('click',function(){
                 var divToClose = $(this).parent();
+                $.fn.removeTag(divToClose);
                 divToClose.remove();
             });
             return tagDiv;
